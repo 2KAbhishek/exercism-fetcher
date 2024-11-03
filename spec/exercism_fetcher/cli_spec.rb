@@ -13,8 +13,9 @@ RSpec.describe ExercismFetcher::CLI do
   describe "#fetch" do
     context "with specific language" do
       it "fetches exercises for the specified language" do
-        allow(fetcher).to receive(:fetch_exercises).with("ruby")
-                                                   .and_return([{ name: "basics", type: "concept" }])
+        allow(fetcher).to receive(:fetch_exercises)
+          .with("ruby")
+          .and_return([{ name: "basics", type: "concept" }])
         allow(fetcher).to receive(:write_language_json)
 
         cli.options = { language: "ruby", output: "test_output" }
@@ -23,14 +24,30 @@ RSpec.describe ExercismFetcher::CLI do
     end
 
     context "without specific language" do
-      it "fetches exercises for all languages" do
-        allow(fetcher).to receive(:fetch_languages).and_return(%w[ruby python])
+      before do
+        allow(fetcher).to receive(:fetch_languages).and_return(%w[xyz_lang ruby])
         allow(fetcher).to receive(:fetch_exercises)
+          .with("ruby")
           .and_return([{ name: "basics", type: "concept" }])
+        allow(fetcher).to receive(:fetch_exercises)
+          .with("xyz_lang")
+          .and_return([])
         allow(fetcher).to receive(:write_language_json)
+      end
 
-        cli.options = { output: "test_output" }
+      it "fetches exercises for all languages" do
         expect { cli.fetch }.not_to raise_error
+      end
+
+      it "sorts languages before fetching exercises" do
+        cli.fetch
+        expect(fetcher).to have_received(:fetch_exercises).with("ruby").ordered
+        expect(fetcher).to have_received(:fetch_exercises).with("xyz_lang").ordered
+      end
+
+      it "writes json only for languages that contain exercises" do
+        cli.fetch
+        expect(fetcher).to have_received(:write_language_json).once
       end
     end
   end

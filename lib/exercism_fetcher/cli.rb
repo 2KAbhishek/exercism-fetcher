@@ -18,8 +18,10 @@ module ExercismFetcher
                     fetcher.fetch_languages
                   end
 
-      languages.each do |language|
+      languages.sort.each do |language|
         exercises = fetcher.fetch_exercises(language)
+        next if exercises.empty?
+
         fetcher.write_language_json(language, exercises, options[:output])
         puts "✓ Fetched exercises for #{language}"
       end
