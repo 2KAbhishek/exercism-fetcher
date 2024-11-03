@@ -5,6 +5,9 @@ require "tmpdir"
 
 RSpec.describe ExercismFetcher::DataFetcher do
   let(:fetcher) { described_class.new }
+  let(:command) do
+    'gh repo list exercism -L 1000 --json name,description --jq ".[] | {name: .name, description: .description}"'
+  end
 
   before do
     allow(Open3).to receive(:capture3)
@@ -21,7 +24,7 @@ RSpec.describe ExercismFetcher::DataFetcher do
       ].join("\n")
 
       allow(Open3).to receive(:capture3)
-        .with('gh repo list exercism -L 1000 --json name,description --jq ".[] | {name: .name, description: .description}"')
+        .with(command)
         .and_return([sample_response, "", double(success?: true)])
 
       expect(fetcher.fetch_languages).to eq(%w[ruby python])
@@ -35,7 +38,7 @@ RSpec.describe ExercismFetcher::DataFetcher do
       ].join("\n")
 
       allow(Open3).to receive(:capture3)
-        .with('gh repo list exercism -L 1000 --json name,description --jq ".[] | {name: .name, description: .description}"')
+        .with(command)
         .and_return([sample_response, "", double(success?: true)])
 
       expect(fetcher.fetch_languages).to eq(%w[ruby python])
@@ -43,7 +46,7 @@ RSpec.describe ExercismFetcher::DataFetcher do
 
     it "raises an error when gh command fails" do
       allow(Open3).to receive(:capture3)
-        .with('gh repo list exercism -L 1000 --json name,description --jq ".[] | {name: .name, description: .description}"')
+        .with(command)
         .and_return(["", "Error", double(success?: false)])
 
       expect { fetcher.fetch_languages }.to raise_error(ExercismFetcher::Error, /Failed to fetch repositories/)
