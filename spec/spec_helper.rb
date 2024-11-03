@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require "exercism/fetcher"
+require "exercism_fetcher"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
