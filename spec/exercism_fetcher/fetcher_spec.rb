@@ -12,17 +12,37 @@ RSpec.describe ExercismFetcher::Fetcher do
   end
 
   describe "#fetch_languages" do
-    it "extracts languages from repository descriptions" do
+    it "extracts language repositories with exercise descriptions" do
+      sample_response = [
+        '{"name": "ruby", "description": "Exercism exercises in Ruby"}',
+        '{"name": "python", "description": "Exercism exercises in Python"}',
+        '{"name": "website", "description": "The Exercism website"}'
+      ].join("\n")
+
       allow(Open3).to receive(:capture3)
-        .with('gh repo list exercism -L 1000 --json name,description --jq ".[].description"')
-        .and_return(["Exercism exercises in Ruby\nExercism exercises in Python", "", double(success?: true)])
+        .with('gh repo list exercism -L 1000 --json name,description --jq ".[] | {name: .name, description: .description}"')
+        .and_return([sample_response, "", double(success?: true)])
+
+      expect(fetcher.fetch_languages).to eq(%w[ruby python])
+    end
+
+    it "handles invalid JSON lines gracefully" do
+      sample_response = [
+        '{"name": "ruby", "description": "Exercism exercises in Ruby"}',
+        "invalid json line",
+        '{"name": "python", "description": "Exercism exercises in Python"}'
+      ].join("\n")
+
+      allow(Open3).to receive(:capture3)
+        .with('gh repo list exercism -L 1000 --json name,description --jq ".[] | {name: .name, description: .description}"')
+        .and_return([sample_response, "", double(success?: true)])
 
       expect(fetcher.fetch_languages).to eq(%w[ruby python])
     end
 
     it "raises an error when gh command fails" do
       allow(Open3).to receive(:capture3)
-        .with('gh repo list exercism -L 1000 --json name,description --jq ".[].description"')
+        .with('gh repo list exercism -L 1000 --json name,description --jq ".[] | {name: .name, description: .description}"')
         .and_return(["", "Error", double(success?: false)])
 
       expect { fetcher.fetch_languages }.to raise_error(ExercismFetcher::Error, /Failed to fetch repositories/)
@@ -44,6 +64,19 @@ RSpec.describe ExercismFetcher::Fetcher do
         { name: "basics", type: "concept" },
         { name: "hello-world", type: "practice" }
       )
+    end
+
+    it "returns empty array when directory is not found" do
+      allow(Open3).to receive(:capture3)
+        .with("gh api /repos/exercism/ruby/contents/exercises/concept --jq '.[].name'")
+        .and_return(["", "404 Not Found", double(success?: false)])
+
+      allow(Open3).to receive(:capture3)
+        .with("gh api /repos/exercism/ruby/contents/exercises/practice --jq '.[].name'")
+        .and_return(["", "404 Not Found", double(success?: false)])
+
+      exercises = fetcher.fetch_exercises("ruby")
+      expect(exercises).to be_empty
     end
   end
 

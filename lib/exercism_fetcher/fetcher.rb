@@ -13,12 +13,18 @@ module ExercismFetcher
 
     def fetch_languages
       stdout, stderr, status = Open3.capture3(
-        'gh repo list exercism -L 1000 --json name,description --jq ".[].description"'
+        'gh repo list exercism -L 1000 --json name,description --jq ".[] | {name: .name, description: .description}"'
       )
       raise Error, "Failed to fetch repositories: #{stderr}" unless status.success?
 
-      descriptions = stdout.split("\n")
-      descriptions.map { |desc| extract_language(desc) }.compact.uniq
+      stdout.each_line.filter_map do |line|
+        repo = JSON.parse(line)
+        next unless repo["description"]&.match?(/Exercism exercises in/i)
+
+        repo["name"].downcase
+      rescue JSON::ParserError
+        nil
+      end
     end
 
     def fetch_exercises(language)
@@ -43,13 +49,6 @@ module ExercismFetcher
     def check_gh_installation
       _, _, status = Open3.capture3("gh --version")
       raise Error, "GitHub CLI (gh) is not installed. Please install it first." unless status.success?
-    end
-
-    def extract_language(description)
-      return nil unless description
-
-      match = description.match(/Exercism exercises in ([A-Za-z#+]+)/)
-      match ? match[1].downcase : nil
     end
 
     def fetch_directory_content(language, type)
