@@ -7,8 +7,9 @@ RSpec.describe ExercismFetcher::Fetcher do
   let(:fetcher) { described_class.new }
 
   before do
-    allow(Open3).to receive(:capture3).with("gh --version")
-                                      .and_return(["gh version 2.0.0", "", double(success?: true)])
+    allow(Open3).to receive(:capture3)
+      .with("gh --version")
+      .and_return(["gh version 2.0.0", "", double(success?: true)])
   end
 
   describe "#fetch_languages" do
@@ -63,6 +64,21 @@ RSpec.describe ExercismFetcher::Fetcher do
       expect(exercises).to contain_exactly(
         { name: "basics", type: "concept" },
         { name: "hello-world", type: "practice" }
+      )
+    end
+
+    it "does not include hidden directories" do
+      allow(Open3).to receive(:capture3)
+        .with("gh api /repos/exercism/ruby/contents/exercises/concept --jq '.[].name'")
+        .and_return(["basics\n.keep", "", double(success?: true)])
+
+      allow(Open3).to receive(:capture3)
+        .with("gh api /repos/exercism/ruby/contents/exercises/practice --jq '.[].name'")
+        .and_return([".hidden_dir", "", double(success?: true)])
+
+      exercises = fetcher.fetch_exercises("ruby")
+      expect(exercises).to contain_exactly(
+        { name: "basics", type: "concept" }
       )
     end
 

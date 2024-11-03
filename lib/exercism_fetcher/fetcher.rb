@@ -31,7 +31,8 @@ module ExercismFetcher
       exercises = []
       %w[concept practice].each do |type|
         dir_content = fetch_directory_content(language, type)
-        exercises += dir_content.map { |exercise| { name: exercise, type: type } }
+        exercises += dir_content.reject { |exercise| exercise.start_with?(".") }
+                                .map { |exercise| { name: exercise, type: type } }
       end
       exercises
     end
