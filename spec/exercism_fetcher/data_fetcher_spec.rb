@@ -6,7 +6,7 @@ require "tmpdir"
 RSpec.describe ExercismFetcher::DataFetcher do
   let(:fetcher) { described_class.new }
   let(:command) do
-    'gh repo list exercism -L 1000 --json name,description --jq ".[] | {name: .name, description: .description}"'
+    "gh repo list exercism -L 1000 --json name,description"
   end
 
   before do
@@ -18,24 +18,10 @@ RSpec.describe ExercismFetcher::DataFetcher do
   describe "#fetch_languages" do
     it "extracts language repositories with exercise descriptions" do
       sample_response = [
-        '{"name": "ruby", "description": "Exercism exercises in Ruby"}',
-        '{"name": "python", "description": "Exercism exercises in Python"}',
-        '{"name": "website", "description": "The Exercism website"}'
-      ].join("\n")
-
-      allow(Open3).to receive(:capture3)
-        .with(command)
-        .and_return([sample_response, "", double(success?: true)])
-
-      expect(fetcher.fetch_languages).to eq(%w[ruby python])
-    end
-
-    it "handles invalid JSON lines gracefully" do
-      sample_response = [
-        '{"name": "ruby", "description": "Exercism exercises in Ruby"}',
-        "invalid json line",
-        '{"name": "python", "description": "Exercism exercises in Python"}'
-      ].join("\n")
+        { name: "ruby", description: "Exercism exercises in Ruby" },
+        { name: "python", description: "Exercism exercises in Python" },
+        { name: "website", description: "The Exercism website" }
+      ].to_json
 
       allow(Open3).to receive(:capture3)
         .with(command)

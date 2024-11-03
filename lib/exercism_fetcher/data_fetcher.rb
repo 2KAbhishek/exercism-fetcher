@@ -12,17 +12,15 @@ module ExercismFetcher
 
     def fetch_languages
       stdout, stderr, status = Open3.capture3(
-        'gh repo list exercism -L 1000 --json name,description --jq ".[] | {name: .name, description: .description}"'
+        "gh repo list exercism -L 1000 --json name,description"
       )
       raise Error, "Failed to fetch repositories: #{stderr}" unless status.success?
 
-      stdout.each_line.filter_map do |line|
-        repo = JSON.parse(line)
+      repos = JSON.parse(stdout)
+      repos.filter_map do |repo|
         next unless repo["description"]&.match?(/Exercism exercises in/i)
 
         repo["name"].downcase
-      rescue JSON::ParserError
-        nil
       end
     end
 
