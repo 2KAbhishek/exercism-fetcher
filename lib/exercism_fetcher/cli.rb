@@ -11,12 +11,7 @@ module ExercismFetcher
     def fetch
       fetcher = DataFetcher.new
 
-      languages = if options[:language]
-                    [options[:language].downcase]
-                  else
-                    fetcher.fetch_languages
-                  end
-
+      languages = options[:language] ? [options[:language].downcase] : fetcher.fetch_languages
       languages.sort.each do |language|
         exercises = fetcher.fetch_exercises(language)
         next if exercises.empty?
