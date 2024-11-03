@@ -10,8 +10,16 @@ module ExercismFetcher
 
     def fetch
       fetcher = DataFetcher.new
-
       languages = options[:language] ? [options[:language].downcase] : fetcher.fetch_languages
+      process_languages(fetcher, languages)
+    rescue Error => e
+      puts "Error: #{e.message}"
+      exit 1
+    end
+
+    private
+
+    def process_languages(fetcher, languages)
       languages.sort.each do |language|
         exercises = fetcher.fetch_exercises(language)
         next if exercises.empty?
@@ -19,9 +27,6 @@ module ExercismFetcher
         fetcher.write_language_json(language, exercises, options[:output])
         puts "✓ Fetched exercises for #{language}"
       end
-    rescue Error => e
-      puts "Error: #{e.message}"
-      exit 1
     end
 
     default_task :fetch
