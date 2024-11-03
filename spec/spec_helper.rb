@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+require "simplecov"
+SimpleCov.start
+
 require "exercism_fetcher"
 
 RSpec.configure do |config|
