@@ -4,7 +4,6 @@ require_relative "exercism_fetcher/version"
 require_relative "exercism_fetcher/data_fetcher"
 require_relative "exercism_fetcher/cli"
 
-# Main module
 module ExercismFetcher
   class Error < StandardError; end
 

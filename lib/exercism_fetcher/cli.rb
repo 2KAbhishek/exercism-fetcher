@@ -3,7 +3,6 @@
 require "thor"
 
 module ExercismFetcher
-  # CLI for fetcher
   class CLI < Thor
     desc "fetch", "Fetch Exercism exercises"
     method_option :language, type: :string, desc: "Specific language to fetch"

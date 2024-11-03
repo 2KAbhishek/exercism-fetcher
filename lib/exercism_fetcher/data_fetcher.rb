@@ -5,7 +5,6 @@ require "open3"
 require "fileutils"
 
 module ExercismFetcher
-  # Fetches exercism data
   class DataFetcher
     def initialize
       check_gh_installation
@@ -54,7 +53,7 @@ module ExercismFetcher
 
     def fetch_directory_content(language, type)
       path = "exercises/#{type}"
-      stdout, stderr, status = Open3.capture3(
+      stdout, _, status = Open3.capture3(
         "gh api /repos/exercism/#{language}/contents/#{path} --jq '.[].name'"
       )
 
