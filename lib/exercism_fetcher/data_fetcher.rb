@@ -6,7 +6,7 @@ require "fileutils"
 
 module ExercismFetcher
   # Fetches exercism data
-  class Fetcher
+  class DataFetcher
     def initialize
       check_gh_installation
     end

@@ -3,7 +3,7 @@
 require "spec_helper"
 require "tmpdir"
 
-RSpec.describe ExercismFetcher::Fetcher do
+RSpec.describe ExercismFetcher::DataFetcher do
   let(:fetcher) { described_class.new }
 
   before do

@@ -4,10 +4,10 @@ require "spec_helper"
 
 RSpec.describe ExercismFetcher::CLI do
   let(:cli) { described_class.new }
-  let(:fetcher) { instance_double(ExercismFetcher::Fetcher) }
+  let(:fetcher) { instance_double(ExercismFetcher::DataFetcher) }
 
   before do
-    allow(ExercismFetcher::Fetcher).to receive(:new).and_return(fetcher)
+    allow(ExercismFetcher::DataFetcher).to receive(:new).and_return(fetcher)
   end
 
   describe "#fetch" do

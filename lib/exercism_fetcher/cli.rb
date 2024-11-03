@@ -10,7 +10,7 @@ module ExercismFetcher
     method_option :output, type: :string, default: "exercism_data", desc: "Output directory"
 
     def fetch
-      fetcher = Fetcher.new
+      fetcher = DataFetcher.new
 
       languages = if options[:language]
                     [options[:language].downcase]
