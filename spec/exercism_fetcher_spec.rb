@@ -9,6 +9,7 @@ RSpec.describe ExercismFetcher do
   end
 
   it "has a version number" do
-    expect(ExercismFetcher::VERSION).not_to be_nil
+    expect(ExercismFetcher::VERSION).to eq("0.1.0")
+    expect(ExercismFetcher::VERSION).to match(/\A\d+\.\d+\.\d+\z/)
   end
 end
